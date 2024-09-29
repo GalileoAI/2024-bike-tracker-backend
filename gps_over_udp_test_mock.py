@@ -4,6 +4,7 @@ from os import listdir
 
 import json
 import socket
+import sys
 import time
 
 @dataclass
@@ -26,18 +27,14 @@ def execute_scenario(socket, server_address, scenario):
             single_coords = Coords(coordinates = n)
             json_message = json.dumps(asdict(single_coords))
             sent = socket.sendto(json_message.encode(), server_address)
-
-            # # Receive response from the server fro debugging!!!
-            # print("Waiting for a response...")
-            # data, server = sock.recvfrom(4096)
-            # print(f"Received: {data.decode()}")
             time.sleep(2)
 
     finally:
         print("End of Scenario...")
 
+def udp_send_coordinates(scenario, server_host="127.0.0.1", server_port=12345):
+    print(f"Connecting to UDP server on {server_host}:{server_port}")
 
-def udp_send_coordinates(scenario, server_host="192.0.0.4", server_port=12345):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     server_address = (server_host, server_port)
@@ -51,4 +48,9 @@ if __name__ == "__main__":
     scenarious = listdir(scenarious_dir)
 
     for scenario in scenarious:
-        udp_send_coordinates(scenarious_dir + "/" + scenario)
+        if len(sys.argv) == 3:
+            _server_host = sys.argv[1]
+            _server_port = int(sys.argv[2])
+            udp_send_coordinates(scenarious_dir + "/" + scenario, server_host=_server_host, server_port=_server_port)
+        else:
+            udp_send_coordinates(scenarious_dir + "/" + scenario)
